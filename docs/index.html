@@ -1,0 +1,190 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="//cdn.muicss.com/mui-0.8.1/css/mui.min.css" rel="stylesheet" type="text/css" />
+
+    <script src="//cdn.muicss.com/mui-0.8.1/js/mui.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/Base64/1.0.0/base64.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.2.5/ace.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.2.5/ext-language_tools.js"></script>
+    <script src="lib/plantuml-encoder.min.js"></script>
+    <style>
+     #editor-pre {
+        position: relative !important;
+        border: 1px solid lightgray;
+        margin: auto;
+        height: 400px;
+    }
+    #editor-pre.fullScreen {
+        height: auto;
+        width: auto;
+        border: 0;
+        margin: 0;
+        position: fixed !important;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 10;
+    }
+    .fullScreen {
+        overflow: hidden
+    }
+    .scrollmargin {
+        height: 500px;
+        text-align: center;
+    }
+    </style>
+    <script>
+        var $q = document.querySelector.bind(document);
+
+        var PLANTUML_BASEURL = "http://plantuml.com/plantuml/svg"
+        var LOCAL_STORAGE_KEY = "plantumlData"
+
+        function parseQuery(qstr) {
+            var query = {};
+            var a = qstr.substr(1).split('&');
+            for (var i = 0; i < a.length; i++) {
+                var b = a[i].split('=');
+                query[decodeURIComponent(b[0])] = decodeURIComponent(b[1] || '');
+            }
+            return query;
+        }
+
+        var dom = require("ace/lib/dom");
+
+    </script>
+  </head>
+  <body>
+    <pre class="mui-panel" id="editor-pre" style="display:none"></pre>
+    <img id="uml-img"></img>
+    <button id="detach-btn" class="mui-btn mui-btn--primary mui-btn--raised"  style="display:none">New Window</div>
+    <button id="attach-btn" class="mui-btn mui-btn--primary mui-btn--raised"  style="display:none">Attach</div>
+    <script>
+        var qParams = parseQuery(window.location.search);
+        var editor;
+        var editorPre = $q("#editor-pre");
+        var umlImg = $q("#uml-img");
+        var detachBtn = $q("#detach-btn");
+        var attachBtn = $q("#attach-btn");
+        var detached = "detached" in qParams;
+        var mainWin = window.opener ? window.opener : window;
+        var detachedWin = window.opener ? window : void 0;
+
+
+        function resetAttachBtnsState() {
+            attachBtn.style.display = detached ? "" : "none";
+            detachBtn.style.display = attachBtn.style.display == "none" ? "" : "none";
+        }
+        function showDiagram(data) {
+            umlImg.style.display = "";
+            umlImg.src = PLANTUML_BASEURL + "/" + plantumlEncoder.encode(data);
+        }
+
+        function hideDiagram(data) {
+            umlImg.style.display = "none";
+            var fullScreen = dom.toggleCssClass(document.body, "fullScreen");
+            dom.setCssClass(editor.container, "fullScreen", fullScreen)
+            editor.setAutoScrollEditorIntoView(!fullScreen)
+            editor.resize()
+        }
+
+        function attach() {
+            detached = false;
+            showDiagram(editor.getValue());
+            var fullScreen = dom.toggleCssClass(document.body, "fullScreen");
+            dom.setCssClass(editor.container, "fullScreen", fullScreen)
+            detachedWin.close();
+            resetAttachBtnsState();
+        }
+
+        function detach() {
+             detached = true;
+             detachedWin = window.open(window.location.href + "?detached", "_blank", "location=yes,scrollbars=yes,status=yes");
+             hideDiagram();
+             resetAttachBtnsState();
+        }
+
+        function setUmlImgData(data) {
+            var img = detachedWin ? detachedWin.umlImg : umlImg;
+            img.src = PLANTUML_BASEURL + "/" + plantumlEncoder.encode(data);
+        }
+
+        function initAce() {
+            var editor = ace.edit("editor-pre");
+            ace.require("ace/ext/language_tools");
+            editor.setOptions({
+                enableLiveAutoComplete: true, // doesn't seem to work yet
+                enableBasicAutocompletion: true // this one I believe triggers by pressing  `Ctrl`+`Space`
+            });
+
+            //add command to all new editor instaces
+            require("ace/commands/default_commands").commands.push({
+                name: "Toggle Fullscreen",
+                bindKey: "Alt+o",
+                exec: function(editor) {
+                    var fullScreen = dom.toggleCssClass(document.body, "fullScreen")
+                    dom.setCssClass(editor.container, "fullScreen", fullScreen)
+                    editor.setAutoScrollEditorIntoView(!fullScreen)
+                    editor.resize()
+                }
+            });
+
+            editor.session.setOptions({
+                useWorker: false,
+                mode: "ace/mode/javascript",
+                tabSize: 2,
+                useSoftTabs: true
+            });
+            editor.getSession().setMode("ace/mode/javascript");
+            return editor;
+        }
+
+        detachBtn.addEventListener("click", function(e) {
+            detach();
+        });
+
+        attachBtn.addEventListener("click", function(e) {
+            window.close();
+        });
+
+        window.addEventListener("resize", function(e) {
+            umlImg.width = e.target.innerWidth;
+        });
+
+        window.addEventListener("beforeunload", function(e) {
+            mainWin.attach();
+        });
+
+
+        var data = localStorage.getItem(LOCAL_STORAGE_KEY);
+        umlImg.width = window.innerWidth;
+
+        if (detached) {
+            attachBtn.style.display = "";
+        } else {
+            detachBtn.style.display = "";
+            editor = initAce();
+            editorPre.style.display = "";
+            editor.on("change", function() {
+                var data = editor.getValue();
+                localStorage.setItem(LOCAL_STORAGE_KEY, data);
+                setUmlImgData(data);
+            });
+            if (data) {
+                editor && editor.setValue(data);
+            }
+        }
+
+        if (data) {
+            showDiagram(data);
+            resetAttachBtnsState();
+        }
+
+    </script>
+  </body>
+</html>
