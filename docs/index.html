@@ -42,8 +42,10 @@
     <script>
         var $q = document.querySelector.bind(document);
 
-        var PLANTUML_BASEURL = "http://plantuml.com/plantuml/svg"
-        var LOCAL_STORAGE_KEY = "plantumlData"
+        var PLANTUML_BASEURL = "http://plantuml.com/plantuml/svg";
+        var LOCAL_STORAGE_KEY = "plantumlData";
+        var EDITOR_HEIGHT = 450;
+        var BTNS_HEIGHT = 50;
 
         function parseQuery(qstr) {
             var query = {};
@@ -60,10 +62,13 @@
     </script>
   </head>
   <body>
-    <pre class="mui-panel" id="editor-pre" style="display:none"></pre>
+    
+    <pre id="editor-pre" style="display:none"></pre>
     <img id="uml-img"></img>
-    <button id="detach-btn" class="mui-btn mui-btn--primary mui-btn--raised"  style="display:none">New Window</div>
-    <button id="attach-btn" class="mui-btn mui-btn--primary mui-btn--raised"  style="display:none">Attach</div>
+    <div id="btns" class="mui-panel">
+        <button id="detach-btn" class="mui-btn mui-btn--primary mui-btn--raised"  style="display:none">New Window</button>
+        <button id="attach-btn" class="mui-btn mui-btn--primary mui-btn--raised"  style="display:none">Attach</button>
+    </div>
     <script>
         var qParams = parseQuery(window.location.search);
         var editor;
@@ -114,8 +119,17 @@
             img.src = PLANTUML_BASEURL + "/" + plantumlEncoder.encode(data);
         }
 
+        function resizeImg() {
+            var height = detached ? window.innerHeight : window.innerHeight - EDITOR_HEIGHT;
+            height -= BTNS_HEIGHT;
+            var width = window.innerWidth;
+            umlImg.style.maxHeight = height + "px";
+            umlImg.style.maxWidth = width + "px";
+        }
+
         function initAce() {
             var editor = ace.edit("editor-pre");
+            EDITOR_HEIGHT = dom.getInnerHeight(editor.container);
             ace.require("ace/ext/language_tools");
             editor.setOptions({
                 enableLiveAutoComplete: true, // doesn't seem to work yet
@@ -151,9 +165,9 @@
         attachBtn.addEventListener("click", function(e) {
             window.close();
         });
-
+    
         window.addEventListener("resize", function(e) {
-            umlImg.width = e.target.innerWidth;
+            resizeImg();
         });
 
         window.addEventListener("beforeunload", function(e) {
@@ -162,7 +176,7 @@
 
 
         var data = localStorage.getItem(LOCAL_STORAGE_KEY);
-        umlImg.width = window.innerWidth;
+        
 
         if (detached) {
             attachBtn.style.display = "";
@@ -179,7 +193,9 @@
                 editor && editor.setValue(data);
             }
         }
-
+        BTNS_HEIGHT = dom.getInnerHeight($q("#btns"));
+        resizeImg();
+        
         if (data) {
             showDiagram(data);
             resetAttachBtnsState();
