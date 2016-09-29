@@ -1,7 +1,7 @@
 skinparam actor {
  BackgroundColor #EAEAFF
  BorderColor #0244B6
- FontColor #0244B6
+ FontColor  #0244B6
 }
 skinparam note {
  BackgroundColor #EAEAFF
@@ -9,22 +9,41 @@ skinparam note {
  FontColor #19479B
 }
 skinparam component {
- BackgroundColor #275EC4
- BorderColor #3C6CC6
- FontColor white
- ArrowColor #003DB1
- ArrowFontColor #2158BC
- FontSize 13
+  BackgroundColor #275EC4  
+  BorderColor #3C6CC6  
+  FontColor white
+  ArrowColor #003DB1
+  ArrowFontColor #2158BC
+  FontSize 13
 }
-skinparam interface {
- BackgroundColor #275EC4
- BorderColor #3C6CC6
- FontColor #19479B
+skinparam class {
+  BackgroundColor #275EC4  
+  BorderColor #3C6CC6  
+  FontColor white
+  ArrowColor #003DB1
+  ArrowFontColor #2158BC
+  FontSize 13
+  AttributeFontColor white
+}
+skinparam object {
+  BackgroundColor #275EC4  
+  BorderColor #3C6CC6  
+  FontColor white
+  ArrowColor #003DB1
+  ArrowFontColor #2158BC
+  FontSize 13
+  AttributeFontColor white
+}
+
+skinparam interface{
+  BackgroundColor #275EC4  
+  BorderColor #3C6CC6
+  FontColor #19479B
 }
 skinparam node {
- BackgroundColor #EAEAFF
- BorderColor #0244B6
- FontColor #19479B
+  BackgroundColor #EAEAFF
+  BorderColor #0244B6
+  FontColor #19479B
 }
 skinparam database {
  BackgroundColor #EAEAFF
@@ -32,12 +51,12 @@ skinparam database {
  FontColor #19479B
 }
 skinparam cloud {
- BackgroundColor #EAEAFF
- BorderColor #0244B6
- FontColor #19479B
+  BackgroundColor #EAEAFF
+  BorderColor #0244B6
+  FontColor #19479B
 }
-skinparam package {
- BackgroundColor #EAEAFF
- BorderColor #0244B6
- FontColor #19479B
+skinparam package{
+  BackgroundColor #EAEAFF
+  BorderColor #0244B6
+  FontColor #19479B
 }
