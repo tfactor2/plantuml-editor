@@ -38,12 +38,20 @@
         height: 500px;
         text-align: center;
     }
+    .width50 {
+        float: left;
+        width: 50%;
+    }
+    
+    .clear {
+        clear: both
+    }
     </style>
     <script>
         var $q = document.querySelector.bind(document);
 
         var PLANTUML_BASEURL = "http://plantuml.com/plantuml/svg";
-        var LOCAL_STORAGE_KEY = "plantumlData";
+        var LOCAL_STORAGE_KEY = "plantumlData_0.3";
         var EDITOR_HEIGHT = 450;
         var BTNS_HEIGHT = 50;
 
@@ -62,13 +70,21 @@
     </script>
   </head>
   <body>
-    
-    <pre id="editor-pre" style="display:none"></pre>
-    <img id="uml-img"></img>
-    <div id="btns" class="mui-panel">
+    <div class="editor-container">
+        <pre id="editor-pre" style="display:none" class="width50"></pre>
+        <div class="width50">
+            <img id="uml-img"></img>
+        </div>
+    </div>
+    <div id="btns" class="mui-panel clear" >
         <button id="detach-btn" class="mui-btn mui-btn--primary mui-btn--raised"  style="display:none">New Window</button>
         <button id="attach-btn" class="mui-btn mui-btn--primary mui-btn--raised"  style="display:none">Attach</button>
+        <select id="diagrams-select" class="mui-select_"></select>
+        <input id="diagrams-name-input" class="mui-textfield_"></input>
+        <button id="new-diagram-btn" class="mui-btn mui-btn--primary mui-btn--raised">New Diagram</button>
+        <button id="delete-diagram-btn" class="mui-btn mui-btn--danger mui-btn--raised">Delete Diagram</button>
     </div>
+    
     <script>
         var qParams = parseQuery(window.location.search);
         var editor;
@@ -76,11 +92,74 @@
         var umlImg = $q("#uml-img");
         var detachBtn = $q("#detach-btn");
         var attachBtn = $q("#attach-btn");
+        var newDiagramBtn = $q("#new-diagram-btn");
+        var deleteDiagramBtn = $q("#delete-diagram-btn");
+        var diagramsSelect = $q("#diagrams-select");
+        var diagramNameInput = $q("#diagrams-name-input");
         var detached = "detached" in qParams;
         var mainWin = window.opener ? window.opener : window;
         var detachedWin = window.opener ? window : void 0;
+        var diagrams = {
+            _diagramsData : {
+                selected: '',
+                list: [],
+            },
+            load: function() {
+                var _diagramsDataJSON = localStorage.getItem(LOCAL_STORAGE_KEY);
+                if (_diagramsDataJSON) this._diagramsData = JSON.parse(_diagramsDataJSON);
+                var id = this._diagramsData.selected;
+                if (!id) {
+                    this.createNew();
+                }
+                this.save();
+            },
+            save: function() {
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(this._diagramsData));
+            },
+            getSelected: function() {
+                return this.get(this._diagramsData.selected);
+            },
+            select: function(id) {
+                this._diagramsData.selected = id;
+                this.save();
+            },
+            
+            get: function(id) {
+                return this._diagramsData.list.find(function(diagram) {
+                    return diagram.id == id;
+                });
+            },
 
+            delete_: function(id) {
+               
+               var idx = this._diagramsData.list.findIndex(function(diagram) {
+                    return diagram.id === id;
+                });
+                if (idx < 0) return;
+                if (this._diagramsData.list.length < 2) return;
+                this._diagramsData.list.splice(idx, 1);
+                this._diagramsData.selected = this._diagramsData.list[0].id;
+            },
 
+            getAll: function() {
+                return this._diagramsData.list;
+            },
+            createNew: function(name) {
+                function genId() {
+                    return Math.random().toString(36).substring(7);
+                }
+                var id = genId();
+                var diagram = {
+                    id: id,
+                    name: id,
+                    data: "",
+                }
+                
+                this._diagramsData.list.push(diagram);
+                this.select(diagram.id);
+            }
+        };
+ 
         function resetAttachBtnsState() {
             attachBtn.style.display = detached ? "" : "none";
             detachBtn.style.display = attachBtn.style.display == "none" ? "" : "none";
@@ -127,6 +206,29 @@
             umlImg.style.maxWidth = width + "px";
         }
 
+        function onDataChange() {
+            diagrams.getSelected().data = editor.getValue();
+            diagrams.getSelected().name = diagramNameInput.value;
+            diagrams.save();
+            updateUI();
+        }
+        
+        function updateUI() {
+            diagramsSelect.innerHTML = '';
+            diagrams.getAll().forEach(function(diagram) {
+                var selected = diagram.id === diagrams.getSelected().id;
+                diagramsSelect.appendChild(new Option(diagram.name, diagram.id, selected, selected));
+            });
+            diagramNameInput.value = diagrams.getSelected().name;
+            var data = diagrams.getSelected().data;
+            if (data !== editor.getValue()) {
+                editor.setValue(data);
+                
+            }
+            setUmlImgData(data);
+            
+        }
+        
         function initAce() {
             var editor = ace.edit("editor-pre");
             EDITOR_HEIGHT = dom.getInnerHeight(editor.container);
@@ -166,6 +268,33 @@
             window.close();
         });
     
+        newDiagramBtn.addEventListener("click", function(e) {
+            diagrams.createNew();
+            updateUI();
+        });
+
+        deleteDiagramBtn.addEventListener("click", function(e) {
+            diagrams.delete_(diagrams.getSelected().id);
+            updateUI();
+        });
+        
+        diagramsSelect.addEventListener("change", function(e) {
+            diagrams.select(e.target.value);
+            diagramNameInput.value = diagrams.getSelected().name;
+            updateUI();
+        });
+
+        function onDiagramInputChange(e) {
+            diagramsSelect.options[diagramsSelect.selectedIndex].text = e.target.value;
+            diagrams.getSelected().name = e.target.value;
+        }
+        diagramNameInput.addEventListener("keyup", onDiagramInputChange);
+        diagramNameInput.addEventListener("paste", onDiagramInputChange);
+        diagramNameInput.addEventListener("change", function(e) {
+            onDiagramInputChange(e);
+            diagrams.save();
+        });
+
         window.addEventListener("resize", function(e) {
             resizeImg();
         });
@@ -174,28 +303,24 @@
             mainWin.attach();
         });
 
-
-        var data = localStorage.getItem(LOCAL_STORAGE_KEY);
+        diagrams.load();
+        var data = diagrams.getSelected().data;
         
-
         if (detached) {
             attachBtn.style.display = "";
+            editor = mainWin.editor;
         } else {
             detachBtn.style.display = "";
             editor = initAce();
             editorPre.style.display = "";
             editor.on("change", function() {
-                var data = editor.getValue();
-                localStorage.setItem(LOCAL_STORAGE_KEY, data);
-                setUmlImgData(data);
+                onDataChange();
             });
-            if (data) {
-                editor && editor.setValue(data);
-            }
         }
         BTNS_HEIGHT = dom.getInnerHeight($q("#btns"));
         resizeImg();
         
+       updateUI();
         if (data) {
             showDiagram(data);
             resetAttachBtnsState();
