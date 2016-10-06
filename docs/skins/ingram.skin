@@ -89,3 +89,17 @@ skinparam package{
   BorderColor node_bordercolor_base2
   FontColor node_color_base1
 }
+
+skinparam sequence {
+  ArrowColor arrow_color_base1
+  ActorBorderColor node_bordercolor_base1
+  LifeLineBorderColor node_bordercolor_base2
+  LifeLineBackgroundColor node_color_base2
+  
+  ParticipantBorderColor node_bordercolor_base1
+  ParticipantBackgroundColor node_color_base1
+  ParticipantFontColor font_color_base1
+  
+  ActorBackgroundColor node_color_base1
+  ActorFontColor font_color_base1
+}
