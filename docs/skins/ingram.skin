@@ -1,62 +1,91 @@
+/' user custom colors '/
+!define arrow_color1 #orange
+!define arrow_color2 #maroon
+!define arrow_color3 #red
+!define arrow_color4 #magenta
+!define arrow_color5 #green
+
+/' skin base colors '/
+!define node_color_base1 #275EC4
+!define node_bordercolor_base1 #3C6CC6
+!define node_color_base2 #EAEAFF
+!define node_bordercolor_base2 #0244B6
+!define font_color_base1 white
+!define arrow_color_base1 #003DB1
+!define color28 #19479B
+!define arrow_font_color_base1 #2158BC
+
+
 skinparam actor {
- BackgroundColor #EAEAFF
- BorderColor #0244B6
- FontColor  #0244B6
+ BackgroundColor node_color_base2
+ BorderColor node_bordercolor_base2
+ FontColor  node_bordercolor_base2
 }
+
 skinparam note {
- BackgroundColor #EAEAFF
- BorderColor #0244B6
- FontColor #19479B
+ BackgroundColor node_color_base2
+ BorderColor node_bordercolor_base2
+ FontColor node_color_base1
 }
+
+skinparam state {
+  BackgroundColor node_color_base1
+  BorderColor node_bordercolor_base1  
+  FontColor font_color_base1
+  ArrowColor arrow_color_base1
+  ArrowFontColor arrow_font_color_base1
+  FontSize 13
+}
+
 skinparam component {
-  BackgroundColor #275EC4  
-  BorderColor #3C6CC6  
-  FontColor white
-  ArrowColor #003DB1
-  ArrowFontColor #2158BC
+  BackgroundColor node_color_base1  
+  BorderColor node_bordercolor_base1  
+  FontColor font_color_base1
+  ArrowColor arrow_color_base1
+  ArrowFontColor arrow_font_color_base1
   FontSize 13
 }
 skinparam class {
-  BackgroundColor #275EC4  
-  BorderColor #3C6CC6  
-  FontColor white
-  ArrowColor #003DB1
-  ArrowFontColor #2158BC
+  BackgroundColor node_color_base1  
+  BorderColor node_bordercolor_base1  
+  FontColor font_color_base1
+  ArrowColor arrow_color_base1
+  ArrowFontColor arrow_font_color_base1
   FontSize 13
-  AttributeFontColor white
+  AttributeFontColor font_color_base1
 }
 skinparam object {
-  BackgroundColor #275EC4  
-  BorderColor #3C6CC6  
-  FontColor white
-  ArrowColor #003DB1
-  ArrowFontColor #2158BC
+  BackgroundColor node_color_base1  
+  BorderColor node_bordercolor_base1  
+  FontColor font_color_base1
+  ArrowColor arrow_color_base1
+  ArrowFontColor arrow_font_color_base1
   FontSize 13
-  AttributeFontColor white
+  AttributeFontColor font_color_base1
 }
 
 skinparam interface{
-  BackgroundColor #275EC4  
-  BorderColor #3C6CC6
-  FontColor #19479B
+  BackgroundColor node_color_base1  
+  BorderColor node_bordercolor_base1
+  FontColor color27
 }
 skinparam node {
-  BackgroundColor #EAEAFF
-  BorderColor #0244B6
-  FontColor #19479B
+  BackgroundColor node_color_base2
+  BorderColor node_bordercolor_base2
+  FontColor color27
 }
 skinparam database {
- BackgroundColor #EAEAFF
- BorderColor #0244B6
- FontColor #19479B
+ BackgroundColor node_color_base2
+ BorderColor node_bordercolor_base2
+ FontColor color27
 }
 skinparam cloud {
-  BackgroundColor #EAEAFF
-  BorderColor #0244B6
-  FontColor #19479B
+  BackgroundColor node_color_base2
+  BorderColor node_bordercolor_base2
+  FontColor color27
 }
 skinparam package{
-  BackgroundColor #EAEAFF
-  BorderColor #0244B6
-  FontColor #19479B
+  BackgroundColor node_color_base2
+  BorderColor node_bordercolor_base2
+  FontColor node_color_base1
 }
