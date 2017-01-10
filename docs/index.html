@@ -83,6 +83,7 @@
         <input id="diagrams-name-input" class="mui-textfield_"></input>
         <button id="new-diagram-btn" class="mui-btn mui-btn--primary mui-btn--raised">New Diagram</button>
         <button id="delete-diagram-btn" class="mui-btn mui-btn--danger mui-btn--raised">Delete Diagram</button>
+        <button id="open-png-btn" class="mui-btn mui-btn--primary mui-btn--raised">Open png</button>
     </div>
     
     <script>
@@ -94,6 +95,7 @@
         var attachBtn = $q("#attach-btn");
         var newDiagramBtn = $q("#new-diagram-btn");
         var deleteDiagramBtn = $q("#delete-diagram-btn");
+        var openPngBtn = $q("#open-png-btn");
         var diagramsSelect = $q("#diagrams-select");
         var diagramNameInput = $q("#diagrams-name-input");
         var detached = "detached" in qParams;
@@ -260,6 +262,18 @@
             return editor;
         }
 
+        function openPngInNewWindow() {
+            var can = document.createElement("canvas");
+            var ctx = can.getContext("2d");
+
+            can.width = umlImg.width;
+            can.height = umlImg.height;
+            ctx.drawImage (umlImg, 0, 0, umlImg.width, umlImg.height);
+
+            var w = window.open('');
+            w.document.write("<img id='png' src='" + can.toDataURL() + "'>");
+        }
+
         detachBtn.addEventListener("click", function(e) {
             detach();
         });
@@ -277,7 +291,9 @@
             diagrams.delete_(diagrams.getSelected().id);
             updateUI();
         });
-        
+
+        openPngBtn.addEventListener("click", openPngInNewWindow);
+
         diagramsSelect.addEventListener("change", function(e) {
             diagrams.select(e.target.value);
             diagramNameInput.value = diagrams.getSelected().name;
