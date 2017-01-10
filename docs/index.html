@@ -73,7 +73,7 @@
     <div class="editor-container">
         <pre id="editor-pre" style="display:none" class="width50"></pre>
         <div class="width50">
-            <img id="uml-img"></img>
+            <img id="uml-img" crossOrigin='Anonymous'></img>
         </div>
     </div>
     <div id="btns" class="mui-panel clear" >
@@ -271,7 +271,7 @@
             ctx.drawImage (umlImg, 0, 0, umlImg.width, umlImg.height);
 
             var w = window.open('');
-            w.document.write("<img id='png' src='" + can.toDataURL() + "'>");
+            w.document.write("<img id='png' src='" + can.toDataURL() + "' crossOrigin='Anonymous'>");
         }
 
         detachBtn.addEventListener("click", function(e) {
