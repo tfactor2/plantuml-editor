@@ -6,22 +6,22 @@
 !define arrow_color5 #green
 
 /' skin base colors '/
-!define node_color_base1 #275EC4
-!define node_bordercolor_base1 #3C6CC6
-!define node_color_base2 #EAEAFF
-!define node_bordercolor_base2 #0244B6
+!define node_color_base1 #4271C6
+!define node_bordercolor_base1 #E9E9E9
+!define node_color_base2 white
+!define node_bordercolor_base2 #A5A5A5
 !define font_color_base1 white
 !define arrow_color_base1 #003DB1
 !define color28 #19479B
 !define arrow_font_color_base1 #2158BC
 
-skinparam defaultFontName Gotham Pro
+skinparam defaultFontName Arial
 skinparam shadowing false
 
 skinparam actor {
  BackgroundColor node_color_base2
  BorderColor node_bordercolor_base2
- FontColor  node_bordercolor_base2
+ FontColor  black
 }
 
 skinparam note {
@@ -87,21 +87,23 @@ skinparam cloud {
   FontColor color27
 }
 skinparam package{
-  BackgroundColor node_color_base2
+  BackgroundColor #EDEDED
   BorderColor node_bordercolor_base2
-  FontColor node_color_base1
+  FontColor black
 }
 
 skinparam sequence {
   ArrowColor arrow_color_base1
   ActorBorderColor node_bordercolor_base1
   LifeLineBorderColor node_bordercolor_base2
-  LifeLineBackgroundColor node_color_base2
+  LifeLineBackgroundColor E9E9E9
   
   ParticipantBorderColor node_bordercolor_base1
   ParticipantBackgroundColor node_color_base1
   ParticipantFontColor font_color_base1
   
   ActorBackgroundColor node_color_base1
-  ActorFontColor font_color_base1
+  ActorFontColor black
 }
+
+skinparam dpi 200

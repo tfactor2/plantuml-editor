@@ -1,24 +1,30 @@
 <!doctype html>
 <html>
-  <head>
+
+<head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link href="//cdn.muicss.com/mui-0.8.1/css/mui.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css">
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-    <script src="//cdn.muicss.com/mui-0.8.1/js/mui.min.js"></script>
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></script>
+
+
+
     <script src="//cdnjs.cloudflare.com/ajax/libs/Base64/1.0.0/base64.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.2.5/ace.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.2.5/ext-language_tools.js"></script>
+    <script src="https://cdn.rawgit.com/lingtalfi/simpledrag/master/simpledrag.js"></script>
+
     <script src="lib/plantuml-encoder.min.js"></script>
     <style>
      #editor-pre {
-        position: relative !important;
-        border: 1px solid lightgray;
-        margin: auto;
-        height: 400px;
+        border-right: 1px solid lightgray;
     }
+
     #editor-pre.fullScreen {
         height: auto;
         width: auto;
@@ -38,19 +44,54 @@
         height: 500px;
         text-align: center;
     }
-    .width50 {
-        float: left;
-        width: 50%;
-    }
-    
+ 
     .clear {
         clear: both
     }
+    html, body { height: 100%; }
+    /*body {
+        display: flex;
+        min-height: 100vh;
+        flex-direction: column;
+    }
+
+    main {
+        flex: 1 0 auto;
+    }*/
+    html,
+    body {
+    height: 100%;
+    margin: 0
+    }
+
+    .box {
+        display: flex;
+        flex-flow: column;
+        height: 100%;
+    }
+
+    .editor-container {
+        display: flex;
+        flex-direction:row;
+        height:100%
+    }
+    .ace-tm {
+        background-color: inherit;
+    }
+
+     #panes-separator {
+            width: 2px;
+            position: relative;
+            cursor: col-resize;
+        }
+
     </style>
     <script>
         var $q = document.querySelector.bind(document);
 
-        var PLANTUML_BASEURL = "http://converter.plantuml.pw:8080/plantuml/svg";
+        var PLANTUML_BASEURL_SVG = "http://converter.plantuml.pw:8080/plantuml/svg";
+        var PLANTUML_BASEURL_PNG = "http://converter.plantuml.pw:8080/plantuml/png";
+
         var LOCAL_STORAGE_KEY = "plantumlData_0.3";
         var EDITOR_HEIGHT = 450;
         var BTNS_HEIGHT = 50;
@@ -68,24 +109,46 @@
         var dom = require("ace/lib/dom");
 
     </script>
-  </head>
-  <body>
-    <div class="editor-container">
-        <pre id="editor-pre" style="display:none" class="width50"></pre>
-        <div class="width50">
+</head>
+
+<body class="box">
+    <nav class="light-blue darken-4">
+        <div class="nav-wrapper">
+            <a href="#" class="brand-logo">Plantuml editor</a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li>
+                    <a id="detach-btn" style="display:none"><i class="material-icons left">tab</i>Split windows</a>
+                    <a id="attach-btn" style="display:none"><i class="material-icons left">web</i>One window</li>
+                </li>
+                <li><a id="open-png-btn"><i class="material-icons left">add</i>Open as png</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="content editor-container">
+        <div id="left-pane" style="width: 50%;">
+            <div id="editor-pre" style="display:none;height:100%"></div>
+        </div>
+        <div id="panes-separator" class="light-blue darken-4 " style="width: 10px;" >&nbsp;</div>
+
+        <div id="right-pane" style="width: 50%;" >
             <img id="uml-img" crossOrigin='Anonymous'></img>
         </div>
     </div>
-    <div id="btns" class="mui-panel clear" >
-        <button id="detach-btn" class="mui-btn mui-btn--primary mui-btn--raised"  style="display:none">New Window</button>
-        <button id="attach-btn" class="mui-btn mui-btn--primary mui-btn--raised"  style="display:none">Attach</button>
-        <select id="diagrams-select" class="mui-select_"></select>
-        <input id="diagrams-name-input" class="mui-textfield_"></input>
-        <button id="new-diagram-btn" class="mui-btn mui-btn--primary mui-btn--raised">New Diagram</button>
-        <button id="delete-diagram-btn" class="mui-btn mui-btn--danger mui-btn--raised">Delete Diagram</button>
-        <button id="open-png-btn" class="mui-btn mui-btn--primary mui-btn--raised">Open png</button>
-    </div>
-    
+    <footer id="btns" class="light-blue darken-2 white-text">
+        <div class="container">
+            <div class="row">
+                <button id="new-diagram-btn" class="waves-effect waves-light btn"><i class="material-icons left">add</i>New Diagram</button>
+                <div class="input-field inline">
+                    <select id="diagrams-select"></select>
+                    <label for="diagrams-name-input" data-error="wrong" data-success="right">Select Diagram</label>
+                </div>
+                <div class="input-field inline">
+                    <input id="diagrams-name-input" name="diagrams-name-input">
+                </div>
+                <button id="delete-diagram-btn" class="waves-effect waves-light btn red"><i class="material-icons left">delete</i>Delete</button>
+            </div>
+        </div>
+    </footer>
     <script>
         var qParams = parseQuery(window.location.search);
         var editor;
@@ -98,15 +161,19 @@
         var openPngBtn = $q("#open-png-btn");
         var diagramsSelect = $q("#diagrams-select");
         var diagramNameInput = $q("#diagrams-name-input");
+        var leftPane = document.getElementById('left-pane');
+        var rightPane = document.getElementById('right-pane');
+        var paneSep = document.getElementById('panes-separator');
+
         var detached = "detached" in qParams;
         var mainWin = window.opener ? window.opener : window;
         var detachedWin = window.opener ? window : void 0;
         var diagrams = {
-            _diagramsData : {
+            _diagramsData: {
                 selected: '',
                 list: [],
             },
-            load: function() {
+            load: function () {
                 var _diagramsDataJSON = localStorage.getItem(LOCAL_STORAGE_KEY);
                 if (_diagramsDataJSON) this._diagramsData = JSON.parse(_diagramsDataJSON);
                 var id = this._diagramsData.selected;
@@ -115,26 +182,26 @@
                 }
                 this.save();
             },
-            save: function() {
+            save: function () {
                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(this._diagramsData));
             },
-            getSelected: function() {
+            getSelected: function () {
                 return this.get(this._diagramsData.selected);
             },
-            select: function(id) {
+            select: function (id) {
                 this._diagramsData.selected = id;
                 this.save();
             },
-            
-            get: function(id) {
-                return this._diagramsData.list.find(function(diagram) {
+
+            get: function (id) {
+                return this._diagramsData.list.find(function (diagram) {
                     return diagram.id == id;
                 });
             },
 
-            delete_: function(id) {
-               
-               var idx = this._diagramsData.list.findIndex(function(diagram) {
+            delete_: function (id) {
+
+                var idx = this._diagramsData.list.findIndex(function (diagram) {
                     return diagram.id === id;
                 });
                 if (idx < 0) return;
@@ -143,10 +210,10 @@
                 this._diagramsData.selected = this._diagramsData.list[0].id;
             },
 
-            getAll: function() {
+            getAll: function () {
                 return this._diagramsData.list;
             },
-            createNew: function(name) {
+            createNew: function (name) {
                 function genId() {
                     return Math.random().toString(36).substring(7);
                 }
@@ -156,27 +223,31 @@
                     name: id,
                     data: "",
                 }
-                
+
                 this._diagramsData.list.push(diagram);
                 this.select(diagram.id);
             }
         };
- 
+
         function resetAttachBtnsState() {
             attachBtn.style.display = detached ? "" : "none";
-            detachBtn.style.display = attachBtn.style.display == "none" ? "" : "none";
+            //detachBtn.style.display = attachBtn.style.display == "none" ? "" : "none";
         }
         function showDiagram(data) {
             umlImg.style.display = "";
-            umlImg.src = PLANTUML_BASEURL + "/" + plantumlEncoder.encode(data);
+            umlImg.src = PLANTUML_BASEURL_SVG + "/" + plantumlEncoder.encode(data);
         }
 
         function hideDiagram(data) {
             umlImg.style.display = "none";
+            rightPane.style.display = "";
+            paneSep.style.display = "none";
+            leftPane.style.width = "100%";
+
             var fullScreen = dom.toggleCssClass(document.body, "fullScreen");
-            dom.setCssClass(editor.container, "fullScreen", fullScreen)
-            editor.setAutoScrollEditorIntoView(!fullScreen)
-            editor.resize()
+            dom.setCssClass(editor.container, "fullScreen", fullScreen);
+            editor.setAutoScrollEditorIntoView(!fullScreen);
+            editor.resize();
         }
 
         function attach() {
@@ -189,15 +260,15 @@
         }
 
         function detach() {
-             detached = true;
-             detachedWin = window.open(window.location.href + "?detached", "_blank", "location=yes,scrollbars=yes,status=yes");
-             hideDiagram();
-             resetAttachBtnsState();
+            detached = true;
+            detachedWin = window.open(window.location.href + "?detached", "_blank", "location=yes,scrollbars=yes,status=yes");
+            hideDiagram();
+            resetAttachBtnsState();
         }
 
         function setUmlImgData(data) {
             var img = detachedWin ? detachedWin.umlImg : umlImg;
-            img.src = PLANTUML_BASEURL + "/" + plantumlEncoder.encode(data);
+            img.src = PLANTUML_BASEURL_SVG + "/" + plantumlEncoder.encode(data);
         }
 
         function resizeImg() {
@@ -214,10 +285,10 @@
             diagrams.save();
             updateUI();
         }
-        
+
         function updateUI() {
             diagramsSelect.innerHTML = '';
-            diagrams.getAll().forEach(function(diagram) {
+            diagrams.getAll().forEach(function (diagram) {
                 var selected = diagram.id === diagrams.getSelected().id;
                 diagramsSelect.appendChild(new Option(diagram.name, diagram.id, selected, selected));
             });
@@ -225,26 +296,26 @@
             var data = diagrams.getSelected().data;
             if (data !== editor.getValue()) {
                 editor.setValue(data);
-                
             }
+            $("select").material_select();
             setUmlImgData(data);
-            
+
         }
-        
+
         function initAce() {
             var editor = ace.edit("editor-pre");
             EDITOR_HEIGHT = dom.getInnerHeight(editor.container);
             ace.require("ace/ext/language_tools");
             editor.setOptions({
                 enableLiveAutoComplete: true, // doesn't seem to work yet
-                enableBasicAutocompletion: true // this one I believe triggers by pressing  `Ctrl`+`Space`
+                enableBasicAutocompletion: true // this one I believe triggers by pressing  `Ctrl`+`Space`,
             });
 
             //add command to all new editor instaces
             require("ace/commands/default_commands").commands.push({
                 name: "Toggle Fullscreen",
                 bindKey: "Alt+o",
-                exec: function(editor) {
+                exec: function (editor) {
                     var fullScreen = dom.toggleCssClass(document.body, "fullScreen")
                     dom.setCssClass(editor.container, "fullScreen", fullScreen)
                     editor.setAutoScrollEditorIntoView(!fullScreen)
@@ -261,40 +332,65 @@
             editor.getSession().setMode("ace/mode/javascript");
             return editor;
         }
+        $(document).ready(function(){
+
+            var heightUpdateFunction = function() {
+
+                // This call is required for the editor to fix all of
+                // its inner structure for adapting to a change in size
+                editor.resize();
+            };
+
+            // Set initial size to match initial content
+            heightUpdateFunction();
+
+            // Whenever a change happens inside the ACE editor, update
+            // the size again
+            editor.getSession().on('change', heightUpdateFunction);
+        });
 
         function openPngInNewWindow() {
+            window.open(PLANTUML_BASEURL_PNG + "/" + plantumlEncoder.encode(
+                "skinparam dpi 200\n" +
+                editor.getValue()) + "/" + encodeURIComponent(diagrams.getSelected().name)
+            );
+
+            // the code below is not used as a lot of desktop programs support png8 only
+            // canvas.toDataURL generates png24 indeed
+            /*
             var can = document.createElement("canvas");
             var ctx = can.getContext("2d");
 
-            can.width = umlImg.width;
-            can.height = umlImg.height;
-            ctx.drawImage (umlImg, 0, 0, umlImg.width, umlImg.height);
+            can.width = umlImg.width*3;
+            can.height = umlImg.height*3;
+            ctx.drawImage(umlImg, 0, 0, can.width, can.height);
 
             var w = window.open('');
-            w.document.write("<img id='png' src='" + can.toDataURL() + "' crossOrigin='Anonymous'>");
+            w.document.write("<img id='png' src='" + can.toDataURL("image/png8") + "' crossOrigin='Anonymous'>");
+            */
         }
 
-        detachBtn.addEventListener("click", function(e) {
+        detachBtn.addEventListener("click", function (e) {
             detach();
         });
 
-        attachBtn.addEventListener("click", function(e) {
+        attachBtn.addEventListener("click", function (e) {
             window.close();
         });
-    
-        newDiagramBtn.addEventListener("click", function(e) {
+
+        newDiagramBtn.addEventListener("click", function (e) {
             diagrams.createNew();
             updateUI();
         });
 
-        deleteDiagramBtn.addEventListener("click", function(e) {
+        deleteDiagramBtn.addEventListener("click", function (e) {
             diagrams.delete_(diagrams.getSelected().id);
             updateUI();
         });
 
         openPngBtn.addEventListener("click", openPngInNewWindow);
 
-        diagramsSelect.addEventListener("change", function(e) {
+        diagramsSelect.addEventListener("change", function (e) {
             diagrams.select(e.target.value);
             diagramNameInput.value = diagrams.getSelected().name;
             updateUI();
@@ -302,46 +398,85 @@
 
         function onDiagramInputChange(e) {
             diagramsSelect.options[diagramsSelect.selectedIndex].text = e.target.value;
+            $("select").material_select();
             diagrams.getSelected().name = e.target.value;
         }
         diagramNameInput.addEventListener("keyup", onDiagramInputChange);
         diagramNameInput.addEventListener("paste", onDiagramInputChange);
-        diagramNameInput.addEventListener("change", function(e) {
+        diagramNameInput.addEventListener("change", function (e) {
             onDiagramInputChange(e);
             diagrams.save();
         });
 
-        window.addEventListener("resize", function(e) {
+        window.addEventListener("resize", function (e) {
             resizeImg();
         });
 
-        window.addEventListener("beforeunload", function(e) {
+        window.addEventListener("beforeunload", function (e) {
             mainWin.attach();
         });
 
         diagrams.load();
         var data = diagrams.getSelected().data;
-        
+
         if (detached) {
             attachBtn.style.display = "";
             editor = mainWin.editor;
         } else {
-            detachBtn.style.display = "";
+            //detachBtn.style.display = "";
             editor = initAce();
             editorPre.style.display = "";
-            editor.on("change", function() {
+            editor.on("change", function () {
                 onDataChange();
             });
         }
         BTNS_HEIGHT = dom.getInnerHeight($q("#btns"));
+        editor.resize();
         resizeImg();
-        
-       updateUI();
+
+        updateUI();
         if (data) {
             showDiagram(data);
             resetAttachBtnsState();
         }
 
+    // The script below constrains the target to move horizontally between a left and a right virtual boundaries.
+    // - the left limit is positioned at 10% of the screen width
+    // - the right limit is positioned at 90% of the screen width
+    var leftLimit = 10;
+    var rightLimit = 90;
+
+
+    paneSep.sdrag(function (el, pageX, startX, pageY, startY, fix) {
+
+        fix.skipX = true;
+
+        if (pageX < window.innerWidth * leftLimit / 100) {
+            pageX = window.innerWidth * leftLimit / 100;
+            fix.pageX = pageX;
+        }
+        if (pageX > window.innerWidth * rightLimit / 100) {
+            pageX = window.innerWidth * rightLimit / 100;
+            fix.pageX = pageX;
+        }
+
+        var cur = pageX / window.innerWidth * 100;
+        if (cur < 0) {
+            cur = 0;
+        }
+        if (cur > window.innerWidth) {
+            cur = window.innerWidth;
+        }
+
+
+        var right = (100-cur);
+        leftPane.style.width = cur + '%';
+        rightPane.style.width = right + '%';
+
+    }, null, 'horizontal');
+
+
     </script>
-  </body>
+</body>
+
 </html>
